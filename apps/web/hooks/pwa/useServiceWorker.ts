@@ -7,15 +7,6 @@ import { supportsServiceWorker } from '@/utils/pwa';
  *
  * 컴포넌트 마운트 시 Service Worker를 등록하고,
  * 업데이트를 감지하여 처리합니다.
- *
- * @example
- * ```tsx
- * function App() {
- *   useServiceWorker();
- *
- *   return <div>My App</div>;
- * }
- * ```
  */
 export const useServiceWorker = () => {
   useEffect(() => {

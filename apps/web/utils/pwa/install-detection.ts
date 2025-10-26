@@ -68,18 +68,3 @@ export const detectInstallMethod = (): InstallMethod => {
   // 나머지는 미지원
   return 'unsupported';
 };
-
-/**
- * PWA 관련 플랫폼 정보 반환 (디버깅용)
- */
-export const getPWAInfo = () => {
-  return {
-    platform: detectPlatform(),
-    browser: detectBrowser(),
-    installMethod: detectInstallMethod(),
-    supportsInstallPrompt: supportsBeforeInstallPrompt(),
-    isStandalone: isStandaloneMode(),
-    supportsServiceWorker: supportsServiceWorker(),
-    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'N/A',
-  };
-};

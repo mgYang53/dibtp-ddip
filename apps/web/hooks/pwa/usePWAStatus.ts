@@ -17,26 +17,6 @@ import {
  * @returns {boolean} isStandalone - PWA가 standalone 모드로 실행 중인지 여부
  * @returns {InstallMethod} installMethod - 플랫폼 및 브라우저에 따른 설치 방법
  * @returns {boolean} isSupported - Service Worker 지원 여부
- *
- * @example
- * ```tsx
- * const { isStandalone, installMethod, isSupported } = usePWAStatus();
- *
- * if (isStandalone) {
- *   // 이미 PWA로 설치되어 실행 중
- *   return <div>PWA 모드로 실행 중입니다</div>;
- * }
- *
- * if (installMethod === 'manual-ios') {
- *   // iOS Safari - 수동 설치 안내 필요
- *   return <IOSInstallGuide />;
- * }
- *
- * if (installMethod === 'beforeinstallprompt') {
- *   // Chrome/Edge - 자동 프롬프트 사용 가능
- *   return <InstallButton />;
- * }
- * ```
  */
 export const usePWAStatus = () => {
   /**

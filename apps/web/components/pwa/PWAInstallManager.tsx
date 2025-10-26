@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { InstallBanner, IOSInstallBanner } from '@/components/pwa';
 
 import { usePWAInstall, usePWAStatus, useServiceWorker } from '@/hooks/pwa';
-import { dismissBanner, getPWAInfo, isBannerDismissed } from '@/utils/pwa';
+import { dismissBanner, isBannerDismissed } from '@/utils/pwa';
 
 /**
  * PWA 설치 관리 컴포넌트
@@ -40,9 +40,6 @@ export const PWAInstallManager = () => {
     setShowBanner(false);
     dismissBanner();
   };
-
-  // eslint-disable-next-line no-console
-  console.log('[PWA] Platform Info:', getPWAInfo());
 
   // Service Worker 미지원 환경
   if (!isSupported) {

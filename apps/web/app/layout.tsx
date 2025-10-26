@@ -57,8 +57,6 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             {/* 바텀시트 포털 컨테이너 */}
             <div id="bottom-sheet-root" className="relative z-50" />
 
-            {/* 프로덕션 환경에서만 PWA 기능 활성화 */}
-            {/* {process.env.NODE_ENV === 'production' && <PWAInstallManager />} */}
             <PWAInstallManager />
           </div>
         </div>
