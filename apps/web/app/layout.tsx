@@ -3,7 +3,8 @@ import type { Metadata, Viewport } from 'next';
 import { ToastProvider } from '@repo/ui/components';
 import localFont from 'next/font/local';
 
-import { PWAManager, WebVitalsReporter } from '@web/components/shared';
+import { PWAInstallManager } from '@web/components/pwa';
+import { WebVitalsReporter } from '@web/components/shared';
 
 import '../styles/globals.css';
 
@@ -57,7 +58,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             <div id="bottom-sheet-root" className="relative z-50" />
 
             {/* 프로덕션 환경에서만 PWA 기능 활성화 */}
-            {process.env.NODE_ENV === 'production' && <PWAManager />}
+            {/* {process.env.NODE_ENV === 'production' && <PWAInstallManager />} */}
+            <PWAInstallManager />
           </div>
         </div>
         {/* Toast 메시지 */}
