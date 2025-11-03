@@ -42,6 +42,13 @@ export const isBannerDismissed = (): boolean => {
 
     // 만료 시간 계산
     const lastDismissedTime = new Date(lastDismissedAt).getTime();
+    // 유효하지 않은 날짜인 경우 상태 초기화
+    if (Number.isNaN(lastDismissedTime)) {
+      localStorage.removeItem(PWA_STORAGE_KEYS.BANNER_DISMISSED);
+      localStorage.removeItem(PWA_STORAGE_KEYS.LAST_DISMISSED_AT);
+      return false;
+    }
+
     const now = Date.now();
     const expiryTime = BANNER_DISMISS_EXPIRY_DAYS * 24 * 60 * 60 * 1000; // 밀리초로 변환
 
