@@ -91,14 +91,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 // 성능 모니터링 도구들을 조합하여 Next.js 설정 완성
 // 1. Bundle Analyzer: 번들 크기 분석
 // 2. Sentry: 런타임 성능 및 에러 모니터링
-export default withSentryConfig(
-  withBundleAnalyzer(nextConfig),
-  {
+export default withBundleAnalyzer(
+  withSentryConfig(nextConfig, {
     // For all available options, see:
     // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
     org: 'mgyang',
     project: 'ddip-web', // deploy/staging 브랜치용 테스트 프로젝트
+    sentryUrl: 'https://mgyang.sentry.io/',
 
     // Only print logs for uploading source maps in CI
     silent: !process.env.CI,
@@ -123,5 +123,5 @@ export default withSentryConfig(
     // https://docs.sentry.io/product/crons/
     // https://vercel.com/docs/cron-jobs
     automaticVercelMonitors: true,
-  }
+  })
 );
