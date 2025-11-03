@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001 --turbopack",
+    "dev:tunnel": "next dev --port 3001 --turbopack --hostname 0.0.0.0",
+    "tunnel": "ngrok http 3001 --host-header=rewrite",
     "build": "next build",
     "start": "next start --port 3001",
     "lint": "next lint --max-warnings 0",
@@ -52,6 +54,7 @@
     "eslint": "^9.28.0",
     "eslint-plugin-storybook": "^9.0.6",
     "kakao.maps.d.ts": "^0.1.40",
+    "ngrok": "~3.4.1",
     "postcss": "^8.5.3",
     "prisma": "^6.10.1",
     "storybook": "^9.0.6",
