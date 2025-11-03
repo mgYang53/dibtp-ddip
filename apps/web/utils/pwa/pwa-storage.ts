@@ -92,7 +92,7 @@ const getDismissCount = (): number => {
 
   try {
     const count = localStorage.getItem(PWA_STORAGE_KEYS.DISMISS_COUNT);
-    return count ? parseInt(count, 10) : 0;
+    return count ? parseInt(count, 10) || 0 : 0;
   } catch (error) {
     return 0;
   }
@@ -117,4 +117,3 @@ export const markAsInstalled = (): void => {
     console.warn('[PWA] Failed to mark as installed:', error);
   }
 };
-
