@@ -54,7 +54,7 @@
     "eslint": "^9.28.0",
     "eslint-plugin-storybook": "^9.0.6",
     "kakao.maps.d.ts": "^0.1.40",
-    "ngrok": "^3.32.0",
+    "ngrok": "~3.4.1",
     "postcss": "^8.5.3",
     "prisma": "^6.10.1",
     "storybook": "^9.0.6",
