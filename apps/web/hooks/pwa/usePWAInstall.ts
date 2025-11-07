@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
-import type { BeforeInstallPromptEvent } from '@/types';
-import { markAsInstalled } from '@/utils/pwa';
+import type { BeforeInstallPromptEvent } from '@web/types';
+import { markAsInstalled } from '@web/utils/pwa';
 
 /**
  * PWA 설치 프롬프트 관리 Hook

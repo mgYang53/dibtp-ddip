@@ -7,7 +7,7 @@ import {
   isStandaloneMode,
   supportsServiceWorker,
   type InstallMethod,
-} from '@/utils/pwa';
+} from '@web/utils/pwa';
 
 /**
  * PWA 상태 감지 Hook
