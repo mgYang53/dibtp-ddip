@@ -8,25 +8,37 @@
  */
 
 // ===== 캐시 버전 및 이름 관리 =====
-// v1.2: Next.js 청크 Cache-First 포함 (안정성 및 성능 개선)
-const CACHE_VERSION = 'v1.2';
+// v1.3: 푸시 알림 지원 추가 (push, notificationclick 이벤트)
+const CACHE_VERSION = 'v1.3';
 const STATIC_CACHE = `ddip-static-${CACHE_VERSION}`; // 필수 정적 에셋
 const CHUNKS_CACHE = `ddip-chunks-${CACHE_VERSION}`; // Next.js 청크 (동적)
 const IMAGE_CACHE = `ddip-images-${CACHE_VERSION}`; // 이미지
+
+// ===== 설정 =====
+const IMAGE_CACHE_MAX_SIZE = 50; // 이미지 캐시 최대 개수
+const CHUNKS_CACHE_MAX_SIZE = 100; // 청크 캐시 최대 개수
+
+// ===== 푸시 알림 설정 =====
+const DEFAULT_NOTIFICATION_ICON = '/images/android-chrome-192x192.png';
+const DEFAULT_NOTIFICATION_BADGE = '/images/ddip_logo.png';
+const NOTIFICATION_VIBRATE_PATTERN = [200, 100, 200];
 
 // ===== 초기 캐싱 리소스 =====
 const STATIC_ASSETS = [
   '/',
   '/favicon.ico',
-  '/images/android-chrome-192x192.png',
+  DEFAULT_NOTIFICATION_ICON,
   '/images/android-chrome-512x512.png',
-  '/images/ddip_logo.png',
+  DEFAULT_NOTIFICATION_BADGE,
   '/images/ddip_logo.svg',
 ];
 
-// ===== 설정 =====
-const IMAGE_CACHE_MAX_SIZE = 50; // 이미지 캐시 최대 개수
-const CHUNKS_CACHE_MAX_SIZE = 100; // 청크 캐시 최대 개수
+const NOTIFICATION_TYPES = {
+  NEW_MESSAGE: 'NEW_MESSAGE',
+  PRICE_DROP: 'PRICE_DROP',
+  AUCTION_SOLD: 'AUCTION_SOLD',
+  SYSTEM_ANNOUNCEMENT: 'SYSTEM_ANNOUNCEMENT',
+};
 
 // ===== Install Event =====
 self.addEventListener('install', (event) => {
@@ -142,6 +154,15 @@ self.addEventListener('fetch', (event) => {
 // ===== 캐시 전략 구현 함수들 =====
 
 /**
+ * URL이 HTTP/HTTPS 스킴인지 확인
+ * @param {URL} url - 확인할 URL 객체
+ * @returns {boolean}
+ */
+function isHttpScheme(url) {
+  return url.protocol === 'http:' || url.protocol === 'https:';
+}
+
+/**
  * Cache-First 전략 (개선)
  *
  * @param {Request} request - 네트워크 요청 객체
@@ -160,7 +181,7 @@ async function cacheFirst(request, cacheName) {
     const url = new URL(request.url);
 
     // HTTP/HTTPS 스킴이고 응답이 정상(200-299)일 때만 캐싱
-    if (response.ok && (url.protocol === 'http:' || url.protocol === 'https:')) {
+    if (response.ok && isHttpScheme(url)) {
       await cache.put(request, response.clone());
 
       // 청크 캐시 크기 제한
@@ -197,7 +218,7 @@ async function staleWhileRevalidate(request, cacheName) {
       const response = await fetch(request);
       const url = new URL(request.url);
 
-      if (response.ok && (url.protocol === 'http:' || url.protocol === 'https:')) {
+      if (response.ok && isHttpScheme(url)) {
         await cache.put(request, response.clone());
         await limitCacheSize(cacheName, IMAGE_CACHE_MAX_SIZE);
       }
@@ -235,6 +256,7 @@ async function limitCacheSize(cacheName, maxItems) {
  * @param {string} cacheName - 사용할 캐시 이름
  * @param {number} timeout - 타임아웃 (밀리초, 기본 3초)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function networkFirstWithTimeout(request, cacheName, timeout = 3000) {
   const cache = await caches.open(cacheName);
 
@@ -245,7 +267,7 @@ async function networkFirstWithTimeout(request, cacheName, timeout = 3000) {
     ]);
 
     const url = new URL(request.url);
-    if (response.ok && (url.protocol === 'http:' || url.protocol === 'https:')) {
+    if (response.ok && isHttpScheme(url)) {
       cache.put(request, response.clone());
     }
     return response;
@@ -258,6 +280,143 @@ async function networkFirstWithTimeout(request, cacheName, timeout = 3000) {
   }
 }
 
-// ===== Phase 5: 푸시 알림 =====
-// TODO: push 이벤트 리스너 추가
-// TODO: notificationclick 이벤트 리스너 추가
+// ===== 푸시 알림 =====
+
+/**
+ * Push 이벤트 리스너
+ * 백엔드에서 푸시 알림을 수신하면 호출됨.
+ */
+self.addEventListener('push', (event) => {
+  if (!event.data) {
+    console.warn('[SW] Push event received with no data');
+    return;
+  }
+
+  try {
+    const payload = event.data.json();
+    const { title, body, icon, badge, data, actions } = payload;
+
+    // 고유 tag 생성 (알림 타입별 중복 방지)
+    const tag = generateNotificationTag(data);
+
+    const options = {
+      body,
+      icon: icon || DEFAULT_NOTIFICATION_ICON,
+      badge: badge || DEFAULT_NOTIFICATION_BADGE,
+      tag,
+      data,
+      actions: actions || [],
+      vibrate: NOTIFICATION_VIBRATE_PATTERN,
+      requireInteraction: data?.type === NOTIFICATION_TYPES.NEW_MESSAGE, // 메시지는 수동 닫기 필요
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+  } catch (error) {
+    console.error('[SW] Failed to parse push notification:', error);
+  }
+});
+
+/**
+ * Notification Click 이벤트 리스너
+ * 사용자가 알림을 클릭하면 호출됨
+ */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const { data } = event.notification;
+  const url = determineNotificationUrl(data);
+
+  event.waitUntil(handleNotificationClick(url));
+});
+
+/**
+ * 알림 클릭 처리 - 기존 창 활성화 또는 새 창 열기
+ * @param {string} url - 이동할 URL
+ */
+async function handleNotificationClick(url) {
+  // 기존 창이 있으면 focus, 없으면 새 창 열기
+  const clients = await self.clients.matchAll({
+    type: 'window',
+    includeUncontrolled: true,
+  });
+
+  // 이미 열려있는 창 중에서 해당 URL이 있는지 확인
+  for (const client of clients) {
+    if (client.url === url && 'focus' in client) {
+      return client.focus();
+    }
+  }
+
+  // 열려있는 창이 있으면 navigate, 없으면 새 창
+  if (clients.length > 0 && 'navigate' in clients[0]) {
+    return clients[0].navigate(url).then((client) => client?.focus());
+  }
+
+  // 새 창 열기
+  if (self.clients.openWindow) {
+    return self.clients.openWindow(url);
+  }
+}
+
+/**
+ * 알림 타입별 고유 tag 생성
+ * 같은 타입의 알림은 중복 표시하지 않고 최신 것으로 대체
+ *
+ * @param {Object} data - 알림 데이터
+ * @returns {string} 고유 tag
+ */
+function generateNotificationTag(data) {
+  if (!data || !data.type) {
+    return `notification-${Date.now()}`;
+  }
+
+  const { type, productId, chatRoomId } = data;
+
+  switch (type) {
+    case NOTIFICATION_TYPES.NEW_MESSAGE:
+      // 채팅방별로 하나의 알림만 표시
+      return chatRoomId ? `chat-${chatRoomId}` : `chat-${Date.now()}`;
+    case NOTIFICATION_TYPES.PRICE_DROP:
+      // 상품별로 하나의 가격 하락 알림만 표시
+      return productId ? `price-drop-${productId}` : `price-drop-${Date.now()}`;
+    case NOTIFICATION_TYPES.AUCTION_SOLD:
+      // 상품별로 하나의 판매 완료 알림만 표시
+      return productId ? `auction-sold-${productId}` : `auction-sold-${Date.now()}`;
+    case NOTIFICATION_TYPES.SYSTEM_ANNOUNCEMENT:
+      // 시스템 공지는 항상 새로 표시
+      return `system-${Date.now()}`;
+    default:
+      return `notification-${type}-${Date.now()}`;
+  }
+}
+
+/**
+ * 알림 데이터에서 이동할 URL 결정
+ *
+ * @param {Object} data - 알림 데이터
+ * @returns {string} 이동할 URL
+ */
+function determineNotificationUrl(data) {
+  if (!data) {
+    return '/';
+  }
+
+  // 명시적인 URL이 있으면 사용
+  if (data.url) {
+    return data.url;
+  }
+
+  const { type, productId, chatRoomId } = data;
+
+  switch (type) {
+    case NOTIFICATION_TYPES.NEW_MESSAGE:
+      return chatRoomId ? `/chat/${chatRoomId}` : '/chat';
+    case NOTIFICATION_TYPES.PRICE_DROP:
+    case NOTIFICATION_TYPES.AUCTION_SOLD:
+      return productId ? `/products/${productId}` : '/';
+    case NOTIFICATION_TYPES.SYSTEM_ANNOUNCEMENT:
+      return '/';
+    default:
+      return '/';
+  }
+}
