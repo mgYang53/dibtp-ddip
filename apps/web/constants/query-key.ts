@@ -20,6 +20,9 @@ export const QUERY_KEY = {
       ['chat', 'rooms', userId, 'detail', chatRoomId] as const,
     MESSAGES: (chatRoomId: string) => ['chat', 'rooms', 'messages', chatRoomId] as const,
   } as const,
+
+  // 푸시 알림 관련
+  PUSH_SUBSCRIPTION_STATUS: ['push-subscription-status'] as const,
 };
 
 // ** TODO: 점진적 마이그레이션을 위한 레거시 상수 관리 **
