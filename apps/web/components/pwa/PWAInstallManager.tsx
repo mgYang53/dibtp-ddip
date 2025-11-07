@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { InstallBanner, IOSInstallBanner } from '@/components/pwa';
+import { InstallBanner, IOSInstallBanner } from '@web/components/pwa';
 
-import { usePWAInstall, usePWAStatus, useServiceWorker } from '@/hooks/pwa';
-import { dismissBanner, isBannerDismissed } from '@/utils/pwa';
+import { usePWAInstall, usePWAStatus, useServiceWorker } from '@web/hooks';
+import { dismissBanner, isBannerDismissed } from '@web/utils/pwa';
 
 /**
  * PWA 설치 관리 컴포넌트
