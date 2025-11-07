@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { supportsServiceWorker } from '@/utils/pwa';
+import { supportsServiceWorker } from '@web/utils/pwa';
 
 /**
  * Service Worker 등록 및 관리 Hook
