@@ -6,4 +6,4 @@ export * from './query-key';
 export * from './image-config';
 export * from './cookies';
 export * from './pwa';
-export * from './push-subscription';
+export * from './push-notification';

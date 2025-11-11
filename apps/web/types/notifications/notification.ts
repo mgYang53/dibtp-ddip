@@ -3,7 +3,7 @@ import type { NotificationType } from '@web/lib/prisma/generated/prisma';
 
 export type { NotificationType };
 
-export interface NotificationPayload {
+interface NotificationPayload {
   title: string;
   body: string;
   icon?: string;
@@ -26,3 +26,6 @@ export interface SendNotificationParams {
   notification: NotificationPayload;
   saveToDb?: boolean; // DB에 알림 이력 저장 여부 (기본: true)
 }
+
+// 알림 권한 상태
+export type NotificationPermissionStatus = 'granted' | 'denied' | 'default';
