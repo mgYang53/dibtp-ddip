@@ -1,13 +1,20 @@
-import { MAX_SUBSCRIPTIONS_PER_USER } from '@/constants';
+import { MAX_SUBSCRIPTIONS_PER_USER } from '@web/constants';
 import { prisma } from '@web/lib/prisma';
-import type { SaveSubscriptionParams } from '@web/types';
+import { PushSubscriptionData } from '@web/types';
 
-export const saveSubscription = async ({
+interface UpsertPushSubscriptionParams {
+  userId: string;
+  subscription: PushSubscriptionData;
+  deviceName?: string;
+  userAgent?: string;
+}
+
+export const upsertPushSubscription = async ({
   userId,
   subscription,
   deviceName,
   userAgent,
-}: SaveSubscriptionParams) => {
+}: UpsertPushSubscriptionParams) => {
   const { endpoint, keys } = subscription;
 
   // 기존 구독 수 확인 (DoS 방지)

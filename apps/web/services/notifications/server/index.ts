@@ -1,3 +1,3 @@
-export * from './saveSubscription';
-export * from './deleteSubscription';
+export * from './upsertPushSubscription';
+export * from './deletePushSubscription';
 export * from './sendPushNotification';
