@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { ToastProvider } from '@repo/ui/components';
 import localFont from 'next/font/local';
 
+import { PushPermissionBanner } from '@web/components/notifications';
 import { PWAInstallManager } from '@web/components/pwa';
 import { WebVitalsReporter } from '@web/components/shared';
 
@@ -58,6 +59,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
             <div id="bottom-sheet-root" className="relative z-50" />
 
             <PWAInstallManager />
+            <PushPermissionBanner />
           </div>
         </div>
         {/* Toast 메시지 */}
