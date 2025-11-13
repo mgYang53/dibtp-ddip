@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { createNotification } from '@web/constants';
 import { prisma } from '@web/lib/prisma';
 
 import { createBid } from '@web/services/bids/server';
+import { sendPushNotification } from '@web/services/notifications/server';
 import { updateProductStatus } from '@web/services/products/server';
 
 import { getUserIdCookie } from '@web/utils/auth/server';
@@ -62,6 +64,24 @@ export async function POST(request: NextRequest) {
 
       return { newBid, updatedProduct };
     });
+
+    // 트랜잭션 완료 후, 비블로킹 방식으로 알림 발송
+    const sellerId = result.updatedProduct.seller_user_id;
+
+    if (sellerId !== userId) {
+      // 비블로킹: 푸시 알림 실패해도 입찰 성공은 유지
+      sendPushNotification({
+        userId: sellerId,
+        notification: createNotification('AUCTION_SOLD', {
+          productId: String(productId),
+          productName: product.title,
+          finalPrice: bidPrice,
+        }),
+      }).catch((error) => {
+        // 에러 로깅만 하고 실패해도 무시
+        console.error('[Push Notification] Failed to send bid notification:', error);
+      });
+    }
 
     const jsonResponse = JSON.stringify(
       {
