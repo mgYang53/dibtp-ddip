@@ -3,7 +3,7 @@ import type { NotificationType } from '@web/lib/prisma/generated/prisma';
 
 export type { NotificationType };
 
-interface NotificationPayload {
+export interface NotificationPayload {
   title: string;
   body: string;
   icon?: string;
