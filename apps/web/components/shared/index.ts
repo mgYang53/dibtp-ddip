@@ -5,3 +5,5 @@ export { default as WebVitalsReporter } from './WebVitalsReporter';
 export { default as NextAvatar } from './NextAvatar';
 export { default as NextThumbnail } from './NextThumbnail';
 export { default as SkeletonBox } from './SkeletonBox';
+export { default as Banner } from './Banner';
+export { default as BannerManager } from './BannerManager';
