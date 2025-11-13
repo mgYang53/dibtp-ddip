@@ -7,3 +7,4 @@ export * from './bids';
 export * from './users';
 export * from './image';
 export * from './pwa';
+export * from './notifications';
