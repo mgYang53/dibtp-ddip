@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
         data: {
           type,
           url: '/',
-          productId: '1',
         },
       },
+      saveToDb: false, // 테스트용이므로 DB 저장 비활성화
     });
 
     return NextResponse.json({ success: true, message: 'Test notification sent' });
