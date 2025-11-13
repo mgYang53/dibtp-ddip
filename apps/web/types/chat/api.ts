@@ -84,6 +84,10 @@ export type CreateChatRoomAPIResponse = ApiResponse<{
 // 메시지 전송 응답
 export type SendMessageAPIResponse = ApiResponse<{
   message: ChatMessage;
+  chatRoom?: {
+    buyer_user_id: string;
+    seller_user_id: string;
+  };
 }>;
 
 // 메시지 읽음 처리 응답
