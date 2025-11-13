@@ -1,5 +1,5 @@
 import { prisma } from '@web/lib/prisma';
-import { webPushClient } from '@web/lib/push';
+import { webPushClient } from '@web/lib/push/server';
 import type { SendNotificationParams } from '@web/types';
 
 export const sendPushNotification = async ({
@@ -16,7 +16,6 @@ export const sendPushNotification = async ({
   });
 
   if (subscriptions.length === 0) {
-    console.log(`No active subscriptions found for user ${userId}`);
     return { sent: 0, failed: 0 };
   }
 
@@ -29,7 +28,6 @@ export const sendPushNotification = async ({
   if (preferences && notification.data?.type) {
     const typeKey = notification.data.type.toLowerCase();
     if (preferences[typeKey as keyof typeof preferences] === false) {
-      console.log(`User ${userId} has disabled ${notification.data.type} notifications`);
       return { sent: 0, failed: 0 };
     }
   }
@@ -61,7 +59,6 @@ export const sendPushNotification = async ({
       } catch (error: any) {
         // 410 Gone 또는 404 Not Found: 구독 만료
         if (error.statusCode === 410 || error.statusCode === 404) {
-          console.log(`Subscription expired, deleting: ${sub.endpoint}`);
           await prisma.push_subscriptions.delete({
             where: { endpoint: sub.endpoint },
           });
@@ -87,8 +84,6 @@ export const sendPushNotification = async ({
   // 5. 결과 집계
   const sent = results.filter((r) => r.status === 'fulfilled').length;
   const failed = results.filter((r) => r.status === 'rejected').length;
-
-  console.log(`Push sent: ${sent}, failed: ${failed} for user ${userId}`);
 
   // 6. DB에 알림 이력 저장 (선택 사항)
   if (saveToDb) {

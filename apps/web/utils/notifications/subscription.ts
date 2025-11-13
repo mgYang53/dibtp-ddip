@@ -1,4 +1,4 @@
-import { ensureVapidKeys } from '@web/lib/push';
+import { getVapidPublicKey } from '@web/lib/push/client';
 import type { PushSubscriptionData } from '@web/types';
 
 const urlBase64ToUint8Array = (base64String: string) => {
@@ -15,7 +15,7 @@ const urlBase64ToUint8Array = (base64String: string) => {
 };
 
 export const subscribeToPush = async (): Promise<PushSubscriptionData> => {
-  const { publicKey } = ensureVapidKeys();
+  const publicKey = getVapidPublicKey();
 
   const registration = await navigator.serviceWorker.ready;
 
