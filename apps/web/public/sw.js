@@ -21,7 +21,6 @@ const CHUNKS_CACHE_MAX_SIZE = 100; // 청크 캐시 최대 개수
 // ===== 푸시 알림 설정 =====
 const DEFAULT_NOTIFICATION_ICON = '/images/android-chrome-192x192.png';
 const DEFAULT_NOTIFICATION_BADGE = '/images/ddip_logo.png';
-const NOTIFICATION_VIBRATE_PATTERN = [200, 100, 200];
 
 // ===== 초기 캐싱 리소스 =====
 const STATIC_ASSETS = [
@@ -306,8 +305,6 @@ self.addEventListener('push', (event) => {
       tag,
       data,
       actions: actions || [],
-      vibrate: NOTIFICATION_VIBRATE_PATTERN,
-      requireInteraction: data?.type === NOTIFICATION_TYPES.NEW_MESSAGE, // 메시지는 수동 닫기 필요
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
