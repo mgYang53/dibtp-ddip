@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [1.29.0] - 2025-11-14
+
+### Added
+- Service Worker 캐시 전략 최적화 (#292) (#297)
+
+### Fixed
+- service worker가 supabase auth api를 차단하는 문제 수정 (#303) (#304)
 ## [1.28.9] - 2025-08-06
 
 ### Changed
