@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 
+import { toast } from '@repo/ui/components';
+
 import { supportsServiceWorker } from '@web/utils/pwa';
 
 /**
  * Service Worker 등록 및 관리 Hook
  *
  * 컴포넌트 마운트 시 Service Worker를 등록하고,
- * 업데이트를 감지하여 처리합니다.
+ * 업데이트를 감지하여 사용자에게 알림을 표시합니다.
  */
 export const useServiceWorker = () => {
   useEffect(() => {
@@ -51,8 +53,7 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration> {
       if (installingWorker.state === 'installed') {
         if (navigator.serviceWorker.controller) {
           // 새로운 Service Worker가 대기 중 (업데이트 감지)
-          // TODO: 사용자에게 업데이트 알림 표시
-          // 예: Toast 메시지나 업데이트 버튼 표시
+          showUpdateNotification(installingWorker);
         }
         // 첫 설치 완료 시에는 별도 처리 불필요 (백그라운드에서 캐시 완료)
       }
@@ -60,4 +61,56 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration> {
   });
 
   return registration;
+}
+
+/**
+ * 사용자에게 업데이트 알림 표시
+ * @param {ServiceWorker} waitingWorker - 대기 중인 Service Worker
+ */
+function showUpdateNotification(waitingWorker: ServiceWorker): void {
+  if (!waitingWorker) {
+    console.warn('[PWA] No waiting worker available');
+    return;
+  }
+
+  // Toast ID 저장 (특정 toast만 닫기 위함)
+  const toastId = toast.info('새로운 버전이 있습니다', {
+    action: {
+      label: '업데이트',
+      onClick: () => {
+        toast.dismiss(toastId); // 이 toast만 닫기
+        updateServiceWorker(waitingWorker);
+      },
+    },
+    cancel: {
+      label: '나중에',
+      onClick: () => toast.dismiss(toastId), // 이 toast만 닫기
+    },
+    duration: Infinity, // 사용자가 직접 닫을 때까지 표시
+  });
+}
+
+/**
+ * Service Worker 업데이트 트리거
+ *
+ * waiting 상태의 Service Worker에게 SKIP_WAITING 메시지를 전송하고,
+ * 새로운 컨트롤러가 활성화되면 페이지를 리로드합니다.
+ *
+ * ⚠️ 중요: controllerchange 리스너를 postMessage 전에 등록!
+ * 이유: Race condition 방지 (SW가 매우 빠르게 활성화될 수 있음)
+ *
+ * @param {ServiceWorker} waitingWorker - 대기 중인 Service Worker
+ */
+function updateServiceWorker(waitingWorker: ServiceWorker): void {
+  // controllerchange 리스너 먼저 등록
+  navigator.serviceWorker.addEventListener(
+    'controllerchange',
+    () => {
+      window.location.reload();
+    },
+    { once: true } // 메모리 누수 방지 + 중복 리로드 방지
+  );
+
+  // 리스너 등록 후 메시지 전송
+  waitingWorker.postMessage({ type: 'SKIP_WAITING' });
 }
