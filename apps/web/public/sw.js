@@ -8,8 +8,8 @@
  */
 
 // ===== 캐시 버전 및 이름 관리 =====
-// v1.3: 푸시 알림 지원 추가 (push, notificationclick 이벤트)
-const CACHE_VERSION = 'v1.3';
+// v1.4: 푸시 알림 지원 추가 (push, notificationclick 이벤트)
+const CACHE_VERSION = 'v1.4';
 const STATIC_CACHE = `ddip-static-${CACHE_VERSION}`; // 필수 정적 에셋
 const CHUNKS_CACHE = `ddip-chunks-${CACHE_VERSION}`; // Next.js 청크 (동적)
 const IMAGE_CACHE = `ddip-images-${CACHE_VERSION}`; // 이미지
