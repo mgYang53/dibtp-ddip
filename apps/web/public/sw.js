@@ -8,8 +8,8 @@
  */
 
 // ===== 캐시 버전 및 이름 관리 =====
-// v1.2: Next.js 청크 Cache-First 포함 (안정성 및 성능 개선)
-const CACHE_VERSION = 'v1.2';
+// v1.3: sw 업데이트 시 클라이언트 알림 기능 추가
+const CACHE_VERSION = 'v1.3';
 const STATIC_CACHE = `ddip-static-${CACHE_VERSION}`; // 필수 정적 에셋
 const CHUNKS_CACHE = `ddip-chunks-${CACHE_VERSION}`; // Next.js 청크 (동적)
 const IMAGE_CACHE = `ddip-images-${CACHE_VERSION}`; // 이미지
@@ -61,15 +61,6 @@ self.addEventListener('activate', (event) => {
       );
 
       await self.clients.claim();
-
-      // TODO: 클라이언트 업데이트 알림 (별도 이슈에서 구현 예정)
-      // const clients = await self.clients.matchAll();
-      // clients.forEach((client) => {
-      //   client.postMessage({
-      //     type: 'SW_UPDATED',
-      //     version: CACHE_VERSION,
-      //   });
-      // });
     })()
   );
 });
@@ -265,6 +256,27 @@ async function networkFirstWithTimeout(request, cacheName, timeout = 3000) {
     throw error;
   }
 }
+
+// ===== Service Worker 업데이트 알림 =====
+/**
+ * SKIP_WAITING 메시지 처리
+ * - 클라이언트로부터 SKIP_WAITING 메시지를 수신하면 즉시 활성화
+ */
+self.addEventListener('message', (event) => {
+  // 이벤트 소스 검증 (보안)
+  if (!event.source) {
+    console.warn('[SW] Received message without source');
+    return;
+  }
+
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    try {
+      self.skipWaiting();
+    } catch (error) {
+      console.error('[SW] skipWaiting() failed:', error);
+    }
+  }
+});
 
 // ===== Phase 5: 푸시 알림 =====
 // TODO: push 이벤트 리스너 추가
