@@ -11,8 +11,6 @@ import { supportsServiceWorker } from '@web/utils/pwa';
  *
  * 컴포넌트 마운트 시 Service Worker를 등록하고,
  * 업데이트를 감지하여 사용자에게 알림을 표시합니다.
- *
- * @see /docs/SW_UPDATE_NOTIFICATION.md
  */
 export const useServiceWorker = () => {
   useEffect(() => {
@@ -67,11 +65,9 @@ async function registerServiceWorker(): Promise<ServiceWorkerRegistration> {
 
 /**
  * 사용자에게 업데이트 알림 표시
- *
  * @param {ServiceWorker} waitingWorker - 대기 중인 Service Worker
  */
 function showUpdateNotification(waitingWorker: ServiceWorker): void {
-  // Defensive: waitingWorker null 체크
   if (!waitingWorker) {
     console.warn('[PWA] No waiting worker available');
     return;
@@ -92,8 +88,6 @@ function showUpdateNotification(waitingWorker: ServiceWorker): void {
     },
     duration: Infinity, // 사용자가 직접 닫을 때까지 표시
   });
-
-  console.log('[PWA] Update notification shown to user');
 }
 
 /**
@@ -108,19 +102,15 @@ function showUpdateNotification(waitingWorker: ServiceWorker): void {
  * @param {ServiceWorker} waitingWorker - 대기 중인 Service Worker
  */
 function updateServiceWorker(waitingWorker: ServiceWorker): void {
-  console.log('[PWA] Triggering Service Worker update');
-
-  // ✅ STEP 1: controllerchange 리스너 먼저 등록
+  // controllerchange 리스너 먼저 등록
   navigator.serviceWorker.addEventListener(
     'controllerchange',
     () => {
-      console.log('[PWA] New Service Worker activated, reloading page...');
       window.location.reload();
     },
-    { once: true } // ✅ 메모리 누수 방지 + 중복 리로드 방지
+    { once: true } // 메모리 누수 방지 + 중복 리로드 방지
   );
 
-  // ✅ STEP 2: 리스너 등록 후 메시지 전송
+  // 리스너 등록 후 메시지 전송
   waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-  console.log('[PWA] SKIP_WAITING message sent to Service Worker');
 }

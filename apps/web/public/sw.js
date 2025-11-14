@@ -8,7 +8,7 @@
  */
 
 // ===== 캐시 버전 및 이름 관리 =====
-// v1.2: Next.js 청크 Cache-First 포함 (안정성 및 성능 개선)
+// v1.3: sw 업데이트 시 클라이언트 알림 기능 추가
 const CACHE_VERSION = 'v1.3';
 const STATIC_CACHE = `ddip-static-${CACHE_VERSION}`; // 필수 정적 에셋
 const CHUNKS_CACHE = `ddip-chunks-${CACHE_VERSION}`; // Next.js 청크 (동적)
@@ -61,19 +61,6 @@ self.addEventListener('activate', (event) => {
       );
 
       await self.clients.claim();
-
-      // 참고: SW_UPDATED 메시지는 선택사항
-      // - controllerchange 이벤트만으로도 클라이언트는 업데이트 감지 가능
-      // - 아래 코드는 로깅/분석 목적으로 필요시 활성화
-      // const clients = await self.clients.matchAll();
-      // clients.forEach((client) => {
-      //   client.postMessage({
-      //     type: 'SW_UPDATED',
-      //     version: CACHE_VERSION,
-      //   });
-      // });
-
-      console.log(`[SW] Service Worker ${CACHE_VERSION} activated and claimed all clients`);
     })()
   );
 });
@@ -262,13 +249,10 @@ async function networkFirstWithTimeout(request, cacheName, timeout = 3000) {
   }
 }
 
-// ===== Message Event =====
+// ===== Service Worker 업데이트 알림 =====
 /**
  * SKIP_WAITING 메시지 처리
- *
- * Phase 4: Service Worker 업데이트 알림 (#300)
  * - 클라이언트로부터 SKIP_WAITING 메시지를 수신하면 즉시 활성화
- * - skipWaiting() 실패 시 SKIP_WAITING_FAILED 메시지를 클라이언트에 전송
  */
 self.addEventListener('message', (event) => {
   // 이벤트 소스 검증 (보안)
@@ -278,19 +262,10 @@ self.addEventListener('message', (event) => {
   }
 
   if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] Received SKIP_WAITING message from client');
-
     try {
       self.skipWaiting();
-      console.log('[SW] skipWaiting() executed successfully');
     } catch (error) {
       console.error('[SW] skipWaiting() failed:', error);
-
-      // Optional: 실패 알림을 클라이언트에 전송
-      event.source.postMessage({
-        type: 'SKIP_WAITING_FAILED',
-        error: error.message,
-      });
     }
   }
 });
