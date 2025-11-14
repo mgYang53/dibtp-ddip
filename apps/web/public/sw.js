@@ -81,8 +81,16 @@ self.addEventListener('fetch', (event) => {
 
   // ===== Cross-Origin 처리 =====
   if (url.origin !== self.location.origin) {
-    // Supabase Storage는 이미지 캐싱을 위해 예외 허용
+    // Supabase 도메인 처리
     if (url.hostname.includes('supabase.co')) {
+      // Auth API (/auth/v1/*): 캐싱 없이 직접 네트워크 요청
+      // - 로그인/로그아웃/세션 갱신 등은 실시간 처리 필요
+      if (url.pathname.includes('/auth/')) {
+        return;
+      }
+
+      // Storage API: Stale-While-Revalidate 전략으로 이미지 캐싱
+      // - 즉시 캐시된 이미지 표시 + 백그라운드에서 갱신
       event.respondWith(staleWhileRevalidate(request, IMAGE_CACHE));
     }
     return;
