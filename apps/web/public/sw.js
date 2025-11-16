@@ -347,19 +347,60 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 /**
+ * URL을 정규화하고 보안 검증
+ * @param {string} urlString - 정규화할 URL
+ * @returns {string|null} 정규화된 URL 또는 null (검증 실패 시)
+ */
+function normalizeAndValidateUrl(urlString) {
+  try {
+    // 상대 경로를 절대 경로로 변환
+    const url = new URL(urlString, self.location.origin);
+
+    // same-origin HTTP/HTTPS만 허용 (보안)
+    if (url.origin !== self.location.origin) {
+      console.warn('[SW] Blocked external URL:', urlString);
+      return null;
+    }
+
+    // HTTP/HTTPS만 허용
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+      console.warn('[SW] Blocked non-HTTP(S) URL:', urlString);
+      return null;
+    }
+
+    return url.href;
+  } catch (error) {
+    console.error('[SW] Invalid URL:', urlString, error);
+    return null;
+  }
+}
+
+/**
  * 알림 클릭 처리 - 기존 창 활성화 또는 새 창 열기
  * @param {string} url - 이동할 URL
  */
 async function handleNotificationClick(url) {
+  // URL 정규화 및 검증
+  const validatedUrl = normalizeAndValidateUrl(url);
+
+  if (!validatedUrl) {
+    // 검증 실패 시 홈으로 이동
+    console.warn('[SW] Invalid notification URL, redirecting to home');
+    url = self.location.origin;
+  } else {
+    url = validatedUrl;
+  }
+
   // 기존 창이 있으면 focus, 없으면 새 창 열기
   const clients = await self.clients.matchAll({
     type: 'window',
     includeUncontrolled: true,
   });
 
-  // 이미 열려있는 창 중에서 해당 URL이 있는지 확인
+  // 이미 열려있는 창 중에서 해당 URL이 있는지 확인 (정규화된 URL로 비교)
   for (const client of clients) {
-    if (client.url === url && 'focus' in client) {
+    const normalizedClientUrl = normalizeAndValidateUrl(client.url);
+    if (normalizedClientUrl === url && 'focus' in client) {
       return client.focus();
     }
   }
