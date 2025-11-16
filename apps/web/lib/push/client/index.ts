@@ -9,7 +9,7 @@ const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 if (!VAPID_PUBLIC_KEY && process.env.NODE_ENV === 'development') {
   // eslint-disable-next-line no-console
   console.warn(
-    '⚠️  VAPID public key is missing!' +
+    '⚠️  VAPID public key is missing!\n' +
       'Push notifications will not work until you:\n' +
       '1. Run: npx web-push generate-vapid-keys\n' +
       '2. Add NEXT_PUBLIC_VAPID_PUBLIC_KEY to .env'

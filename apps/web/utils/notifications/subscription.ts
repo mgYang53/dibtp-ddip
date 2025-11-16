@@ -24,11 +24,21 @@ export const subscribeToPush = async (): Promise<PushSubscriptionData> => {
     applicationServerKey: urlBase64ToUint8Array(publicKey),
   });
 
+  // 구독 키 추출 및 검증
+  const p256dhKey = subscription.getKey('p256dh');
+  const authKey = subscription.getKey('auth');
+
+  if (!p256dhKey || !authKey) {
+    throw new Error(
+      'Push subscription keys are missing. ' + 'This browser may not fully support Web Push API.'
+    );
+  }
+
   return {
     endpoint: subscription.endpoint,
     keys: {
-      p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))),
-      auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!))),
+      p256dh: btoa(String.fromCharCode(...new Uint8Array(p256dhKey))),
+      auth: btoa(String.fromCharCode(...new Uint8Array(authKey))),
     },
   };
 };
