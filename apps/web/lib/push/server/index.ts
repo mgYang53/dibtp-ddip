@@ -8,15 +8,19 @@ import * as webpush from 'web-push';
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || 'mailto:mg960503@gmail.com';
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT;
 
-if ((!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) && process.env.NODE_ENV === 'development') {
+if (
+  (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) &&
+  process.env.NODE_ENV === 'development'
+) {
   // eslint-disable-next-line no-console
   console.warn(
     '⚠️  VAPID keys are missing!\n' +
       'Push notifications will not work until you:\n' +
       '1. Run: npx web-push generate-vapid-keys\n' +
-      '2. Add NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY to .env'
+      '2. Add NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT to .env\n' +
+      '   Example: VAPID_SUBJECT=mailto:your-email@example.com'
   );
 }
 
@@ -29,8 +33,11 @@ let isInitialized = false;
 function initializeWebPush(): void {
   if (isInitialized) return;
 
-  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    throw new Error('❌ VAPID keys are missing!');
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY || !VAPID_SUBJECT) {
+    throw new Error(
+      '❌ VAPID keys are missing!\n' +
+        'Set NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, and VAPID_SUBJECT in .env'
+    );
   }
 
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
