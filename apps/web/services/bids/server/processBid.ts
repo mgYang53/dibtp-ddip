@@ -53,7 +53,10 @@ export const processBid = async ({ productId, userId, bidPrice }: ProcessBidPara
   // 5. 트랜잭션: 입찰 생성 + 상품 상태 업데이트
   const result = await prisma.$transaction(async (tx: TransactionClient) => {
     const newBid = await createBid(productId, userId, bidPrice, tx);
-    const updatedProduct = await updateProductStatus(productId, 'SOLD', tx);
+
+    // 명시적으로 ACTIVE 상태인 경우에만 SOLD로 변경 (Optimistic Locking)
+    // 동시 입찰 시 첫 번째만 성공하고 나머지는 "상품 상태가 ACTIVE가 아닙니다" 에러 발생
+    const updatedProduct = await updateProductStatus(productId, 'SOLD', tx, 'ACTIVE');
 
     return { newBid, updatedProduct };
   });
