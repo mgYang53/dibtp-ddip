@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 import { InstallBanner, IOSInstallBanner } from '@web/components/pwa';
-
+import { PWA_BANNER_STORAGE_CONFIG } from '@web/constants';
 import { usePWAInstall, usePWAStatus, useServiceWorker } from '@web/hooks';
-import { dismissBanner, isBannerDismissed } from '@web/utils/pwa';
+import { dismissBanner, isBannerDismissed } from '@web/utils/common';
 
 /**
  * PWA 설치 관리 컴포넌트
@@ -30,7 +30,7 @@ export const PWAInstallManager = () => {
   useServiceWorker();
 
   // 배너 표시 상태 관리
-  const [showBanner, setShowBanner] = useState(() => !isBannerDismissed());
+  const [showBanner, setShowBanner] = useState(() => !isBannerDismissed(PWA_BANNER_STORAGE_CONFIG));
 
   /**
    * 배너 닫기 핸들러
@@ -38,7 +38,7 @@ export const PWAInstallManager = () => {
    */
   const handleDismiss = () => {
     setShowBanner(false);
-    dismissBanner();
+    dismissBanner(PWA_BANNER_STORAGE_CONFIG);
   };
 
   // Service Worker 미지원 환경

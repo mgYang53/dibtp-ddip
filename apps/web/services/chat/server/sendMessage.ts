@@ -1,8 +1,11 @@
 import { prisma } from '@web/lib/prisma';
-import type { SendMessageAPIRequest, SendMessageAPIResponse } from '@web/types/chat';
+import type { SendMessageAPIRequest, SendMessageAPIResponse } from '@web/types';
 
 /**
- * 메시지를 전송하는 서비스 함수
+ * 메시지를 전송하고 채팅방을 업데이트하는 서비스 함수
+ * - 메시지 생성
+ * - 채팅방 업데이트 (updated_at)
+ * - 채팅방 참여자 정보 반환 (알림 발송용)
  */
 export const sendMessage = async (
   payload: SendMessageAPIRequest
@@ -20,10 +23,11 @@ export const sendMessage = async (
       },
     });
 
-    // 채팅방 업데이트 (마지막 업데이트 시간)
-    await prisma.chat_rooms.update({
+    // 채팅방 업데이트 및 참여자 정보 조회 (단일 쿼리로 N+1 방지)
+    const chatRoom = await prisma.chat_rooms.update({
       where: { chat_room_id: chatRoomId },
       data: { updated_at: new Date() },
+      select: { buyer_user_id: true, seller_user_id: true },
     });
 
     return {
@@ -35,6 +39,11 @@ export const sendMessage = async (
           sender_user_id: newMessage.sender_user_id,
           is_read: newMessage.is_read,
           created_at: newMessage.created_at.toISOString(),
+        },
+        // 알림 발송을 위한 추가 정보
+        chatRoom: {
+          buyer_user_id: chatRoom.buyer_user_id,
+          seller_user_id: chatRoom.seller_user_id,
         },
       },
       error: null,

@@ -13,7 +13,7 @@ export const API_ROUTES = {
   FAVORITES: `${API_BASE}/favorites`,
   MY_INFO: `${API_BASE}/my-info`,
   USERS: `${API_BASE}/users`,
-  
+
   // 채팅 관련
   CHAT: {
     ROOMS: `${API_BASE}/chat/rooms`,
@@ -21,5 +21,10 @@ export const API_ROUTES = {
     MESSAGES: (request: string) => `${API_BASE}/chat/messages?${request}`,
     SEND_MESSAGE: `${API_BASE}/chat/messages/send`,
     MARK_AS_READ: `${API_BASE}/chat/messages/read`,
+  },
+
+  // 푸시 알림 관련
+  PUSH: {
+    SUBSCRIPTIONS: `${API_BASE}/push/subscriptions`,
   },
 } as const;

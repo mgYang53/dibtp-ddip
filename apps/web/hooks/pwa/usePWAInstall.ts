@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
+import { PWA_BANNER_STORAGE_CONFIG } from '@web/constants';
 import type { BeforeInstallPromptEvent } from '@web/types';
-import { markAsInstalled } from '@web/utils/pwa';
+import { markBannerAsInstalled } from '@web/utils/common';
 
 /**
  * PWA 설치 프롬프트 관리 Hook
@@ -46,7 +47,7 @@ export const usePWAInstall = () => {
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
       setIsInstallable(false);
-      markAsInstalled();
+      markBannerAsInstalled(PWA_BANNER_STORAGE_CONFIG);
     };
 
     // 이벤트 리스너 등록

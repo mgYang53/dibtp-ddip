@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
+import { BannerManager } from '@web/components/shared';
 import { createServerQueryClient, prefetchMyInfo } from '@web/lib/query/server';
 import QueryProvider from '@web/providers/QueryProvider';
 
@@ -16,7 +17,10 @@ const MainLayout = async ({ children }: { children: React.ReactNode }) => {
 
   return (
     <QueryProvider>
-      <HydrationBoundary state={dehydrate(queryClient)}>{children}</HydrationBoundary>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        {children}
+        <BannerManager />
+      </HydrationBoundary>
     </QueryProvider>
   );
 };

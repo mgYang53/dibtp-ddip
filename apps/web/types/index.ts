@@ -7,3 +7,4 @@ export type * from './my-info';
 export type * from './bid';
 export type * from './users';
 export type * from './pwa';
+export type * from './notifications';
