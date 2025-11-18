@@ -20,15 +20,12 @@ export const updateProductStatus = async (
   const db = tx || prisma;
   try {
     // WHERE 조건: 명시적 상태 체크 (Optimistic Locking)
-    const whereCondition: { product_id: bigint; status?: ProductStatus } = {
+    const whereCondition = {
       product_id: productId,
+      ...(expectedCurrentStatus && { status: expectedCurrentStatus }),
     };
 
-    if (expectedCurrentStatus) {
-      whereCondition.status = expectedCurrentStatus;
-    }
-
-    const updatedProduct = await db.products.update({
+    const updateResult = await db.products.updateMany({
       where: whereCondition,
       data: {
         status,
@@ -37,17 +34,34 @@ export const updateProductStatus = async (
       },
     });
 
-    return updatedProduct;
-  } catch (error) {
-    console.error('상품 상태 업데이트 오류:', error);
-
-    // Prisma P2025: 레코드를 찾을 수 없음 (상태 조건 불일치)
-    if (error instanceof Error && error.message.includes('P2025')) {
+    // 업데이트된 행이 없으면 에러 (상태 불일치 또는 레코드 없음)
+    if (updateResult.count === 0) {
       throw new Error(
         expectedCurrentStatus
           ? `상품 상태가 ${expectedCurrentStatus}가 아니어서 업데이트할 수 없습니다`
           : '상품을 찾을 수 없습니다'
       );
+    }
+
+    const updatedProduct = await db.products.findUniqueOrThrow({
+      where: { product_id: productId },
+    });
+
+    return updatedProduct;
+  } catch (error) {
+    console.error('상품 상태 업데이트 오류:', error);
+
+    // 이미 던진 명시적 에러는 그대로 전달
+    if (
+      error instanceof Error &&
+      (error.message.includes('상품 상태가') || error.message === '상품을 찾을 수 없습니다')
+    ) {
+      throw error;
+    }
+
+    // P2025: findUniqueOrThrow 실패
+    if (error instanceof Error && error.message.includes('P2025')) {
+      throw new Error('상품을 찾을 수 없습니다');
     }
 
     // 기타 Prisma 오류
