@@ -33,6 +33,5 @@ chat:
 
 # 추가 설정
 knowledge_base:
-  enabled: true
   learnings:
     scope: auto
