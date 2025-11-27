@@ -13,9 +13,12 @@
 
 ### 주요 특징
 
-- 모바일 우선 반응형 디자인
-- Kakao Map API를 활용한 위치 기반 서비스
-- Supabase를 통한 안정적인 백엔드 인프라
+- **하향식 경매 시스템**: 시간이 지남에 따라 가격이 하락하는 독특한 경매 방식
+- **실시간 채팅**: Supabase Realtime을 활용한 즉시 응답 가능한 거래 채팅
+- **위치 기반 거래**: Kakao Map API를 통한 주변 상품 추천 및 지역 필터링
+- **Progressive Web App**: 모바일 앱처럼 설치 가능한 PWA 지원
+- **디자인 시스템**: 모바일 우선 반응형 디자인 및 Storybook 기반 일관된 UI/UX 컴포넌트 라이브러리
+- **안전한 인증**: Supabase Auth 기반 이메일 인증 및 세션 관리
 
 ### 개발 진행 단계
 
@@ -60,6 +63,12 @@
 - 채팅 참여자 목록 표시
 - 채팅 내역 저장 및 조회
 
+### 📱 Progressive Web App (PWA)
+
+- 모바일/데스크톱에서 네이티브 앱처럼 설치 가능
+- Service Worker 업데이트 감지 및 사용자 알림
+- 낙찰 및 채팅 메시지 수신 푸시 알림
+
 ### 📱 사용자 경험
 
 - 모바일 우선 반응형 디자인
@@ -77,6 +86,7 @@
 - **State Management**: TanStack Query (React Query)
 - **UI Components**: Storybook
 - **Form Validation**: Zod
+- **PWA**: Service Worker, Web App Manifest
 
 ### Backend & Database
 
@@ -93,7 +103,8 @@
 - **Code Quality**: ESLint, Prettier
 - **Git Hooks**: Lefthook
 - **Commit Convention**: Commitlint
-- **CI/CD**: Vercel
+- **CI/CD**: Vercel (자동 배포), GitHub Actions (Chromatic Storybook 배포)
+- **Monitoring**: Sentry (에러 추적 및 성능 모니터링)
 
 ### External APIs
 
@@ -131,6 +142,7 @@ pnpm install
 
 # 환경 변수 설정 (apps/web/.env.local)
 # .env.local 파일에 필요한 환경 변수 입력
+# 필요 시 Contributer 문의
 ```
 
 ### 2. 개발 서버 실행
@@ -150,8 +162,8 @@ cd apps/web && pnpm dev  # 웹 앱 (포트 3001)
 pnpm run storybook
 
 # 개별 스토리북 실행
-pnpm storybook:web  # 웹 앱 스토리북 (포트 6008)
 pnpm storybook:ui   # UI 패키지 스토리북
+pnpm storybook:web  # 웹 앱 스토리북
 ```
 
 ## 🔧 주요 명령어
@@ -169,13 +181,24 @@ pnpm run check-types
 
 # 스토리북
 pnpm run storybook
+
+# 데이터베이스 (apps/web 디렉토리에서 실행)
+cd apps/web && pnpm postinstall      # Prisma 클라이언트 생성 (pnpm install 시 자동 실행)
+cd apps/web && pnpm prisma-pull      # 원격 DB 스키마 동기화
 ```
 
 ## 📈 개발 현황 및 로드맵
 
 ### 최근 주요 업데이트
 
-#### [실시간 경매 시스템 구현]
+#### [PWA 기능 강화]
+
+- Service Worker 캐시 전략 최적화 - Cache-First/Stale-While-Revalidate/Network-First 전략 구현
+- iOS/Android 플랫폼별 설치 배너 구현
+- Service Worker 업데이트 감지 및 사용자 알림 구현
+- 낙찰 및 채팅 메시지 수신 푸시 알림 기능 구현
+
+#### [실시간 경매 시스템 완성]
 
 - 경매 상태별 타이머 제어 및 가격 계산 로직 완성
 - 입찰 시스템 및 낙찰 처리 기능 구현
@@ -189,23 +212,27 @@ pnpm run storybook
 
 ### 향후 로드맵
 
-#### Phase 1: 핵심 기능 완성
+#### Phase 1: 성능 최적화
 
-- [ ] 사용자 인증
-- [ ] 위치 기반 상품 추천 기능
-- [ ] 활동 통계
+- [ ] 번들 파일 최적화
+- [ ] Core Web Vitals 개선
+- [ ] 서버/클라이언트 캐싱 최적화
+- [ ] 인증 로직 최적화
+- [ ] 목록 가상화 및 페이징 최적화
+- [ ] 이미지 최적화
 
-#### Phase 2: 고도화 기능
+#### Phase 2: UX 개선 및 기능 완성
 
-- [ ] 실시간 알림 시스템
-- [ ] 필터링 고도화
-- [ ] 사용자 리뷰 시스템
+- [ ] 인증 관련 페이지 UX 개선
+- [ ] 상품 리스트 필터링 고도화
+- [ ] 마이페이지 통계 기능 구현
+- [ ] 채팅 기능 고도화
 
-#### Phase 3: 최적화 및 배포
+#### Phase 3: 디자인 시스템 고도화
 
-- [ ] 성능 최적화 및 서버 캐싱
-- [ ] 사용자 테스트 및 피드백 수집
-- [ ] 상용 서비스 배포 준비
+- [ ] 다크 모드 지원
+- [ ] 컴포넌트 디자인 패턴 개선
+- [ ] 디자인 시스템 빌드 최적화
 
 ## 👥 개발팀 (5조)
 
